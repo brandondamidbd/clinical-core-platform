@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePatientStore } from '@/stores/patientStore';
 import { useMedicalRecordStore } from '@/stores/catalogStores';
 import { useDoctorStore } from '@/stores/doctorStore';
@@ -9,8 +9,10 @@ import { generateId } from '@/stores/helpers';
 
 export default function MedicalRecordPage() {
   const [params] = useSearchParams();
-  const patients = usePatientStore((s) => s.patients.filter(p => !p.metadata.isArchived));
-  const doctors = useDoctorStore((s) => s.doctors.filter(d => d.isActive));
+  const allPatients = usePatientStore((s) => s.patients);
+  const allDoctors = useDoctorStore((s) => s.doctors);
+  const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
+  const doctors = useMemo(() => allDoctors.filter(d => d.isActive), [allDoctors]);
   const records = useMedicalRecordStore((s) => s.records);
   const addRecord = useMedicalRecordStore((s) => s.addRecord);
   const updateRecord = useMedicalRecordStore((s) => s.updateRecord);
