@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePrescriptionStore, useMedicationStore } from '@/stores/catalogStores';
 import { usePatientStore } from '@/stores/patientStore';
 import { useDoctorStore } from '@/stores/doctorStore';
@@ -11,10 +11,13 @@ import { format } from 'date-fns';
 export default function PrescriptionsPage() {
   const prescriptions = usePrescriptionStore((s) => s.prescriptions);
   const addPrescription = usePrescriptionStore((s) => s.addPrescription);
-  const patients = usePatientStore((s) => s.patients.filter(p => !p.metadata.isArchived));
-  const doctors = useDoctorStore((s) => s.doctors.filter(d => d.isActive));
-  const medications = useMedicationStore((s) => s.medications.filter(m => m.isActive));
+  const allPatients = usePatientStore((s) => s.patients);
+  const allDoctors = useDoctorStore((s) => s.doctors);
+  const allMedications = useMedicationStore((s) => s.medications);
   const clinic = useClinicStore((s) => s.clinic);
+  const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
+  const doctors = useMemo(() => allDoctors.filter(d => d.isActive), [allDoctors]);
+  const medications = useMemo(() => allMedications.filter(m => m.isActive), [allMedications]);
 
   const [showForm, setShowForm] = useState(false);
   const [previewId, setPreviewId] = useState<string | null>(null);

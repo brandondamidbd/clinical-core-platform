@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useBudgetStore, useServiceStore } from '@/stores/catalogStores';
 import { usePatientStore } from '@/stores/patientStore';
 import { Plus, X, Printer } from 'lucide-react';
@@ -10,8 +10,10 @@ export default function BudgetsPage() {
   const budgets = useBudgetStore((s) => s.budgets);
   const addBudget = useBudgetStore((s) => s.addBudget);
   const updateBudget = useBudgetStore((s) => s.updateBudget);
-  const patients = usePatientStore((s) => s.patients.filter(p => !p.metadata.isArchived));
-  const services = useServiceStore((s) => s.services.filter(s => s.isActive));
+  const allPatients = usePatientStore((s) => s.patients);
+  const allServices = useServiceStore((s) => s.services);
+  const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
+  const services = useMemo(() => allServices.filter(s => s.isActive), [allServices]);
 
   const [showForm, setShowForm] = useState(false);
   const [patientId, setPatientId] = useState('');

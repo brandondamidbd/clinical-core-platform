@@ -1,7 +1,7 @@
 import { useTreatmentStore, useServiceStore } from '@/stores/catalogStores';
 import { usePatientStore } from '@/stores/patientStore';
 import { useDoctorStore } from '@/stores/doctorStore';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, X } from 'lucide-react';
 import type { TreatmentStatus } from '@/types';
 
@@ -11,9 +11,13 @@ export default function TreatmentsPage() {
   const treatments = useTreatmentStore(s => s.treatments);
   const addTreatment = useTreatmentStore(s => s.addTreatment);
   const updateTreatment = useTreatmentStore(s => s.updateTreatment);
-  const patients = usePatientStore(s => s.patients.filter(p => !p.metadata.isArchived));
-  const doctors = useDoctorStore(s => s.doctors.filter(d => d.isActive));
-  const services = useServiceStore(s => s.services.filter(s => s.isActive));
+  const allPatients = usePatientStore(s => s.patients);
+  const allDoctors = useDoctorStore(s => s.doctors);
+  const allServices = useServiceStore(s => s.services);
+  const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
+  const doctors = useMemo(() => allDoctors.filter(d => d.isActive), [allDoctors]);
+  const services = useMemo(() => allServices.filter(s => s.isActive), [allServices]);
+  
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ patientId: '', doctorId: doctors[0]?.id || '', description: '', price: '', observations: '' });
 

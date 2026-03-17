@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePaymentStore, useTreatmentStore, useServiceStore } from '@/stores/catalogStores';
 import { usePatientStore } from '@/stores/patientStore';
 import { Plus, X, CreditCard } from 'lucide-react';
@@ -7,10 +7,11 @@ import { format } from 'date-fns';
 export default function PaymentsPage() {
   const payments = usePaymentStore((s) => s.payments);
   const addPayment = usePaymentStore((s) => s.addPayment);
-  const patients = usePatientStore((s) => s.patients.filter(p => !p.metadata.isArchived));
+  const allPatients = usePatientStore((s) => s.patients);
   const treatments = useTreatmentStore((s) => s.treatments);
   const updateTreatment = useTreatmentStore((s) => s.updateTreatment);
   const services = useServiceStore((s) => s.services);
+  const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
 
   const [showForm, setShowForm] = useState(false);
   const [patientId, setPatientId] = useState('');

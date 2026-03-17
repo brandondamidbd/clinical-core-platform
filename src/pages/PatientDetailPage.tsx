@@ -1,4 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
+import { useMemo } from 'react';
 import { usePatientStore } from '@/stores/patientStore';
 import { useAppointmentStore } from '@/stores/appointmentStore';
 import { useDoctorStore } from '@/stores/doctorStore';
@@ -9,12 +10,17 @@ import { format } from 'date-fns';
 export default function PatientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const patient = usePatientStore((s) => s.patients.find(p => p.id === id));
-  const appointments = useAppointmentStore((s) => s.appointments.filter(a => a.patientId === id));
+  const allAppointments = useAppointmentStore((s) => s.appointments);
   const doctors = useDoctorStore((s) => s.doctors);
-  const treatments = useTreatmentStore((s) => s.treatments.filter(t => t.patientId === id));
-  const payments = usePaymentStore((s) => s.payments.filter(p => p.patientId === id));
-  const prescriptions = usePrescriptionStore((s) => s.prescriptions.filter(p => p.patientId === id));
-  const budgets = useBudgetStore((s) => s.budgets.filter(b => b.patientId === id));
+  const allTreatments = useTreatmentStore((s) => s.treatments);
+  const allPayments = usePaymentStore((s) => s.payments);
+  const allPrescriptions = usePrescriptionStore((s) => s.prescriptions);
+  const allBudgets = useBudgetStore((s) => s.budgets);
+  const appointments = useMemo(() => allAppointments.filter(a => a.patientId === id), [allAppointments, id]);
+  const treatments = useMemo(() => allTreatments.filter(t => t.patientId === id), [allTreatments, id]);
+  const payments = useMemo(() => allPayments.filter(p => p.patientId === id), [allPayments, id]);
+  const prescriptions = useMemo(() => allPrescriptions.filter(p => p.patientId === id), [allPrescriptions, id]);
+  const budgets = useMemo(() => allBudgets.filter(b => b.patientId === id), [allBudgets, id]);
 
   if (!patient) return <div className="p-8 text-center text-muted-foreground">Paciente no encontrado</div>;
 

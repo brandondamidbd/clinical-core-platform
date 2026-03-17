@@ -82,7 +82,8 @@ function ToothSVG({ number, findings, onSurfaceClick, selectedStatus }: {
 }
 
 export default function OdontogramPage() {
-  const patients = usePatientStore((s) => s.patients.filter(p => !p.metadata.isArchived));
+  const allPatients = usePatientStore((s) => s.patients);
+  const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
   const findings = useOdontogramStore((s) => s.findings);
   const addFinding = useOdontogramStore((s) => s.addFinding);
   const removeFinding = useOdontogramStore((s) => s.removeFinding);
