@@ -4,7 +4,8 @@ import { usePatientStore } from '@/stores/patientStore';
 import { useDoctorStore } from '@/stores/doctorStore';
 import { format, addDays, startOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, X } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Clock, X, Stethoscope } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import type { AppointmentStatus } from '@/types';
 
 const STATUS_LABELS: Record<AppointmentStatus, string> = {
