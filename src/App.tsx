@@ -8,6 +8,7 @@ import { useClinicStore } from "@/stores/clinicStore";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import DashboardPage from "@/pages/DashboardPage";
 import AgendaPage from "@/pages/AgendaPage";
+import ConsultaPage from "@/pages/ConsultaPage";
 import PatientsPage from "@/pages/PatientsPage";
 import PatientDetailPage from "@/pages/PatientDetailPage";
 import MedicalRecordPage from "@/pages/MedicalRecordPage";
@@ -41,6 +42,7 @@ function AppContent() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/consulta" element={<ConsultaPage />} />
         <Route path="/agenda" element={<AgendaPage />} />
         <Route path="/pacientes" element={<PatientsPage />} />
         <Route path="/pacientes/:id" element={<PatientDetailPage />} />

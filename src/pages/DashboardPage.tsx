@@ -3,7 +3,7 @@ import { useDoctorStore } from '@/stores/doctorStore';
 import { usePatientStore } from '@/stores/patientStore';
 import { useAppointmentStore } from '@/stores/appointmentStore';
 import { useTreatmentStore, usePaymentStore } from '@/stores/catalogStores';
-import { Calendar, Users, FileText, CreditCard, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Calendar, Users, FileText, CreditCard, Clock, AlertTriangle, ArrowRight, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -120,9 +120,9 @@ export default function DashboardPage() {
           <h2 className="section-title">Accesos Rápidos</h2>
           <div className="grid grid-cols-2 gap-2">
             {[
+              { label: 'Nueva Consulta', to: '/consulta', icon: PlusCircle },
               { label: 'Nueva Cita', to: '/agenda', icon: Calendar },
               { label: 'Nuevo Paciente', to: '/pacientes', icon: Users },
-              { label: 'Receta', to: '/recetas', icon: FileText },
               { label: 'Recibir Pago', to: '/pagos', icon: CreditCard },
             ].map((action) => (
               <Link

@@ -4,21 +4,25 @@ import {
   Stethoscope, ClipboardList, CreditCard, Receipt, Pill,
   ShieldCheck, Building2, Settings, HelpCircle, UserCog,
   FileCheck, ScrollText, FlaskConical, ChevronLeft, ChevronRight,
-  Activity
+  Activity, PlusCircle
 } from 'lucide-react';
 import { useState } from 'react';
+import { useCurrentRole } from '@/hooks/useCurrentRole';
 
 const NAV_SECTIONS = [
   {
     label: 'Operativa',
+    section: 'operative',
     items: [
       { to: '/', icon: LayoutDashboard, label: 'Inicio' },
+      { to: '/consulta', icon: PlusCircle, label: 'Nueva Consulta', highlight: true },
       { to: '/agenda', icon: Calendar, label: 'Agenda' },
       { to: '/pacientes', icon: Users, label: 'Pacientes' },
     ],
   },
   {
     label: 'Clínica',
+    section: 'clinical',
     items: [
       { to: '/expediente', icon: FileText, label: 'Expediente' },
       { to: '/odontograma', icon: CircleDot, label: 'Odontograma' },
@@ -30,6 +34,7 @@ const NAV_SECTIONS = [
   },
   {
     label: 'Documentos',
+    section: 'documents',
     items: [
       { to: '/recetas', icon: Pill, label: 'Recetas' },
       { to: '/certificados', icon: FileCheck, label: 'Certificados' },
@@ -39,6 +44,7 @@ const NAV_SECTIONS = [
   },
   {
     label: 'Administrativa',
+    section: 'admin',
     items: [
       { to: '/pagos', icon: CreditCard, label: 'Pagos' },
       { to: '/medicos', icon: UserCog, label: 'Médicos' },
@@ -48,6 +54,7 @@ const NAV_SECTIONS = [
   },
   {
     label: 'Configuración',
+    section: 'config',
     items: [
       { to: '/identidad', icon: Building2, label: 'Identidad Clínica' },
       { to: '/usuarios', icon: Users, label: 'Usuarios y Permisos' },
@@ -57,9 +64,22 @@ const NAV_SECTIONS = [
   },
 ];
 
+function getSectionsForRole(permissions: ReturnType<typeof useCurrentRole>['permissions']) {
+  return NAV_SECTIONS.filter(section => {
+    if (section.section === 'operative') return true;
+    if (section.section === 'clinical') return permissions.canViewClinical;
+    if (section.section === 'documents') return permissions.canViewDocuments;
+    if (section.section === 'admin') return permissions.canViewAdmin;
+    if (section.section === 'config') return permissions.canViewConfig;
+    return true;
+  });
+}
+
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { permissions } = useCurrentRole();
+  const sections = getSectionsForRole(permissions);
 
   return (
     <aside
@@ -80,7 +100,7 @@ export function AppSidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 px-2">
-        {NAV_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <div key={section.label} className="mb-3">
             {!collapsed && (
               <div className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-muted px-2 mb-1">
@@ -89,6 +109,7 @@ export function AppSidebar() {
             )}
             {section.items.map((item) => {
               const isActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to));
+              const isHighlight = 'highlight' in item && item.highlight;
               return (
                 <NavLink
                   key={item.to}
@@ -96,7 +117,9 @@ export function AppSidebar() {
                   className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-medium transition-colors mb-0.5 ${
                     isActive
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                      : isHighlight
+                        ? 'text-primary-foreground bg-primary/80 hover:bg-primary'
+                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
                   }`}
                   title={collapsed ? item.label : undefined}
                 >
