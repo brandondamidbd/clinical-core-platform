@@ -42,6 +42,7 @@ function AppContent() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/consulta" element={<ConsultaPage />} />
         <Route path="/agenda" element={<AgendaPage />} />
         <Route path="/pacientes" element={<PatientsPage />} />
         <Route path="/pacientes/:id" element={<PatientDetailPage />} />

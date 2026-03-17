@@ -93,13 +93,23 @@ export default function AgendaPage() {
                             <div className="text-xs font-medium">{patient ? `${patient.firstName} ${patient.lastName}` : '—'}</div>
                             <div className="meta-text">{appt.startTime}–{appt.endTime} · {appt.reason} · {doctor?.fullName || '—'}</div>
                           </div>
-                          <select
-                            value={appt.status}
-                            onChange={(e) => setStatus(appt.id, e.target.value as AppointmentStatus)}
-                            className="text-[10px] border rounded px-1.5 py-0.5 bg-card"
-                          >
-                            {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                          </select>
+                          <div className="flex items-center gap-1.5">
+                            <select
+                              value={appt.status}
+                              onChange={(e) => setStatus(appt.id, e.target.value as AppointmentStatus)}
+                              className="text-[10px] border rounded px-1.5 py-0.5 bg-card"
+                            >
+                              {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                            </select>
+                            {(appt.status === 'confirmed' || appt.status === 'attended') && (
+                              <Link
+                                to={`/consulta?patientId=${appt.patientId}&appointmentId=${appt.id}`}
+                                className="flex items-center gap-1 text-[10px] font-medium text-primary hover:underline"
+                              >
+                                <Stethoscope className="w-3 h-3" /> Consulta
+                              </Link>
+                            )}
+                          </div>
                         </div>
                       );
                     })}

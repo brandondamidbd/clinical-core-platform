@@ -120,9 +120,9 @@ export default function DashboardPage() {
           <h2 className="section-title">Accesos Rápidos</h2>
           <div className="grid grid-cols-2 gap-2">
             {[
+              { label: 'Nueva Consulta', to: '/consulta', icon: PlusCircle },
               { label: 'Nueva Cita', to: '/agenda', icon: Calendar },
               { label: 'Nuevo Paciente', to: '/pacientes', icon: Users },
-              { label: 'Receta', to: '/recetas', icon: FileText },
               { label: 'Recibir Pago', to: '/pagos', icon: CreditCard },
             ].map((action) => (
               <Link
