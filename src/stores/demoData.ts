@@ -89,18 +89,17 @@ export function seedDemoData(stores: {
     stores.userStore.setState((s: any) => ({ users: [...s.users, adminUser] }));
   }
 
-  // Seed some appointments for today
+}
+
+export function seedDemoAppointments(appointmentStore: any, patientStore: any, doctorStore: any) {
+  if (appointmentStore.getState().appointments.length > 0) return;
   const today = new Date().toISOString().split('T')[0];
-  const patients = stores.patientStore.getState().patients;
-  const doctors = stores.doctorStore.getState().doctors;
-  
+  const patients = patientStore.getState().patients;
+  const doctors = doctorStore.getState().doctors;
   if (patients.length >= 2 && doctors.length >= 1) {
-    const { addAppointment } = require('./appointmentStore').useAppointmentStore.getState();
-    const appts = require('./appointmentStore').useAppointmentStore.getState().appointments;
-    if (appts.length === 0) {
-      addAppointment({ date: today, startTime: '09:00', endTime: '09:30', duration: 30, patientId: patients[0].id, doctorId: doctors[0].id, reason: 'Consulta general - revisión', status: 'confirmed' as const, phone: patients[0].phone });
-      addAppointment({ date: today, startTime: '10:00', endTime: '10:45', duration: 45, patientId: patients[1].id, doctorId: doctors[0].id, reason: 'Limpieza dental', status: 'pending' as const, phone: patients[1].phone });
-      addAppointment({ date: today, startTime: '11:30', endTime: '12:15', duration: 45, patientId: patients[3].id, doctorId: doctors[1].id, reason: 'Valoración ortodoncia', status: 'confirmed' as const, phone: patients[3].phone });
-    }
+    const { addAppointment } = appointmentStore.getState();
+    addAppointment({ date: today, startTime: '09:00', endTime: '09:30', duration: 30, patientId: patients[0].id, doctorId: doctors[0].id, reason: 'Consulta general - revisión', status: 'confirmed' as const, phone: patients[0].phone });
+    addAppointment({ date: today, startTime: '10:00', endTime: '10:45', duration: 45, patientId: patients[1].id, doctorId: doctors[0].id, reason: 'Limpieza dental', status: 'pending' as const, phone: patients[1].phone });
+    addAppointment({ date: today, startTime: '11:30', endTime: '12:15', duration: 45, patientId: patients[3].id, doctorId: doctors[1].id, reason: 'Valoración ortodoncia', status: 'confirmed' as const, phone: patients[3].phone });
   }
 }
