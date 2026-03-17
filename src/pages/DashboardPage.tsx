@@ -3,7 +3,7 @@ import { useDoctorStore } from '@/stores/doctorStore';
 import { usePatientStore } from '@/stores/patientStore';
 import { useAppointmentStore } from '@/stores/appointmentStore';
 import { useTreatmentStore, usePaymentStore } from '@/stores/catalogStores';
-import { Calendar, Users, FileText, CreditCard, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Calendar, Users, FileText, CreditCard, Clock, AlertTriangle, ArrowRight, PlusCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
