@@ -286,7 +286,7 @@ export default function ConsultaPage() {
         </div>
         <button
           onClick={handleFinalize}
-          className="flex items-center gap-2 bg-green-600 text-white text-xs px-4 py-2 rounded-md hover:bg-green-700 font-medium"
+          className="flex items-center gap-2 bg-success text-success-foreground text-xs px-4 py-2 rounded-md hover:bg-success/90 font-medium"
         >
           <CheckCircle2 className="w-4 h-4" /> Finalizar Consulta
         </button>
