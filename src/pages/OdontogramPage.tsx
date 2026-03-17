@@ -108,11 +108,13 @@ export default function OdontogramPage() {
     });
   };
 
-  const teeth = dentition === 'permanent' ? PERMANENT_TEETH : TEMPORARY_TEETH;
-  const upperLeft = dentition === 'permanent' ? teeth.q1 : (teeth as any).q5;
-  const upperRight = dentition === 'permanent' ? teeth.q2 : (teeth as any).q6;
-  const lowerLeft = dentition === 'permanent' ? teeth.q4 : (teeth as any).q8;
-  const lowerRight = dentition === 'permanent' ? teeth.q3 : (teeth as any).q7;
+  const getTeeth = () => {
+    if (dentition === 'permanent') {
+      return { upperLeft: PERMANENT_TEETH.q1, upperRight: PERMANENT_TEETH.q2, lowerLeft: PERMANENT_TEETH.q4, lowerRight: PERMANENT_TEETH.q3 };
+    }
+    return { upperLeft: TEMPORARY_TEETH.q5, upperRight: TEMPORARY_TEETH.q6, lowerLeft: TEMPORARY_TEETH.q8, lowerRight: TEMPORARY_TEETH.q7 };
+  };
+  const { upperLeft, upperRight, lowerLeft, lowerRight } = getTeeth();
 
   return (
     <div className="space-y-4 animate-fade-in">
