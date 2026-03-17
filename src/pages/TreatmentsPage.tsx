@@ -17,7 +17,7 @@ export default function TreatmentsPage() {
   const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
   const doctors = useMemo(() => allDoctors.filter(d => d.isActive), [allDoctors]);
   const services = useMemo(() => allServices.filter(s => s.isActive), [allServices]);
-  const services = useServiceStore(s => s.services.filter(s => s.isActive));
+  
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ patientId: '', doctorId: doctors[0]?.id || '', description: '', price: '', observations: '' });
 
