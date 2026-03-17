@@ -303,7 +303,7 @@ export default function ConsultaPage() {
                 key={step.key}
                 onClick={() => setActiveStep(step.key)}
                 className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors text-left ${
-                  isActive ? 'bg-primary text-primary-foreground' : isDone ? 'bg-green-50 text-green-700 hover:bg-green-100' : 'hover:bg-muted text-muted-foreground'
+                  isActive ? 'bg-primary text-primary-foreground' : isDone ? 'bg-success/10 text-success hover:bg-success/20' : 'hover:bg-muted text-muted-foreground'
                 }`}
               >
                 {isDone ? <Check className="w-4 h-4" /> : <step.icon className="w-4 h-4" />}
