@@ -8,6 +8,7 @@ import { useClinicStore } from "@/stores/clinicStore";
 import OnboardingWizard from "@/components/OnboardingWizard";
 import DashboardPage from "@/pages/DashboardPage";
 import AgendaPage from "@/pages/AgendaPage";
+import ConsultaPage from "@/pages/ConsultaPage";
 import PatientsPage from "@/pages/PatientsPage";
 import PatientDetailPage from "@/pages/PatientDetailPage";
 import MedicalRecordPage from "@/pages/MedicalRecordPage";
