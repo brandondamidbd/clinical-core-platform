@@ -1,16 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { useClinicStore } from '@/stores/clinicStore';
-import { useCurrentRole } from '@/hooks/useCurrentRole';
 import { Bell, Search } from 'lucide-react';
-import type { UserRole } from '@/types';
-
-const AVAILABLE_ROLES: UserRole[] = ['admin', 'doctor', 'receptionist', 'billing', 'readonly'];
 
 export function AppLayout() {
   const clinic = useClinicStore((s) => s.clinic);
   const subscription = useClinicStore((s) => s.subscription);
-  const { currentRole, setCurrentRole, label, ROLE_LABELS } = useCurrentRole();
 
   return (
     <div className="flex w-full min-h-screen bg-background">
@@ -28,17 +23,6 @@ export function AppLayout() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {/* Demo role switcher */}
-            <select
-              value={currentRole}
-              onChange={e => setCurrentRole(e.target.value as UserRole)}
-              className="text-[10px] font-medium border rounded px-2 py-1 bg-card text-foreground"
-            >
-              {AVAILABLE_ROLES.map(r => (
-                <option key={r} value={r}>{ROLE_LABELS[r]}</option>
-              ))}
-            </select>
-
             {subscription.status !== 'active' && subscription.status !== 'trial' && (
               <span className="text-[10px] font-medium bg-warning/10 text-warning px-2 py-0.5 rounded">
                 {subscription.status === 'grace' ? 'Período de gracia' : subscription.status === 'restricted' ? 'Acceso restringido' : 'Suscripción vencida'}
@@ -55,10 +39,10 @@ export function AppLayout() {
             </button>
             <div className="flex items-center gap-2 pl-3 border-l">
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-[10px] font-semibold text-primary">{label.slice(0, 2).toUpperCase()}</span>
+                <span className="text-[10px] font-semibold text-primary">AD</span>
               </div>
               <div className="hidden sm:block">
-                <div className="text-xs font-medium leading-none">{label}</div>
+                <div className="text-xs font-medium leading-none">Administrador</div>
                 <div className="text-[10px] text-muted-foreground leading-none mt-0.5">{clinic?.name || 'Sin clínica'}</div>
               </div>
             </div>
