@@ -1,27 +1,30 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { usePatientStore } from '@/stores/patientStore';
+import { useDoctorStore } from '@/stores/doctorStore';
 import { Link } from 'react-router-dom';
 import { Plus, Search, X, AlertTriangle } from 'lucide-react';
-import type { Patient } from '@/types';
+import { toast } from 'sonner';
 
 export default function PatientsPage() {
-  const patients = usePatientStore((s) => s.patients);
-  const addPatient = usePatientStore((s) => s.addPatient);
-  const checkDuplicate = usePatientStore((s) => s.checkDuplicate);
+  const patients = usePatientStore(s => s.patients);
+  const addPatient = usePatientStore(s => s.addPatient);
+  const checkDuplicate = usePatientStore(s => s.checkDuplicate);
+  const doctors = useDoctorStore(s => s.doctors).filter(d => d.isActive);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [formError, setFormError] = useState('');
   const [dupWarning, setDupWarning] = useState('');
 
-  const filtered = patients.filter(p => !p.metadata.isArchived && (
+  const filtered = useMemo(() => patients.filter(p => !p.metadata.isArchived && (
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
     p.phone.includes(search) || (p.email && p.email.toLowerCase().includes(search.toLowerCase()))
-  ));
+  )), [patients, search]);
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', dateOfBirth: '', sex: 'M' as 'M' | 'F' | 'other',
     phone: '', email: '', address: '', maritalStatus: '', bloodType: '',
-    guardianName: '', guardianPhone: '',
+    guardianName: '', guardianPhone: '', birthPlace: '', education: '', occupation: '',
+    allergies: '', primaryDoctorId: '',
   });
 
   const handleSubmit = () => {
@@ -30,10 +33,17 @@ export default function PatientsPage() {
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { setFormError('Correo electrónico inválido'); return; }
     const dup = checkDuplicate(form.firstName, form.lastName, form.phone, form.email);
     if (dup && !dupWarning) { setDupWarning(`Posible duplicado: ${dup.firstName} ${dup.lastName} (${dup.phone}). Guarda de nuevo para confirmar.`); return; }
-    addPatient({ ...form, allergies: [] });
-    setShowForm(false);
-    setForm({ firstName: '', lastName: '', dateOfBirth: '', sex: 'M', phone: '', email: '', address: '', maritalStatus: '', bloodType: '', guardianName: '', guardianPhone: '' });
-    setDupWarning('');
+    addPatient({
+      firstName: form.firstName, lastName: form.lastName, dateOfBirth: form.dateOfBirth,
+      sex: form.sex, phone: form.phone, email: form.email || undefined, address: form.address || undefined,
+      maritalStatus: form.maritalStatus || undefined, bloodType: form.bloodType || undefined,
+      guardianName: form.guardianName || undefined, guardianPhone: form.guardianPhone || undefined,
+      birthPlace: form.birthPlace || undefined, education: form.education || undefined,
+      occupation: form.occupation || undefined, primaryDoctorId: form.primaryDoctorId || undefined,
+      allergies: form.allergies ? form.allergies.split(',').map(a => a.trim()).filter(Boolean) : [],
+    });
+    setShowForm(false); setDupWarning(''); toast.success('Paciente registrado');
+    setForm({ firstName: '', lastName: '', dateOfBirth: '', sex: 'M', phone: '', email: '', address: '', maritalStatus: '', bloodType: '', guardianName: '', guardianPhone: '', birthPlace: '', education: '', occupation: '', allergies: '', primaryDoctorId: '' });
   };
 
   return (
@@ -98,14 +108,28 @@ export default function PatientsPage() {
               <div><label className="text-xs font-medium mb-1 block">Teléfono *</label><input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="input-clinical h-9" placeholder="+52..." /></div>
               <div><label className="text-xs font-medium mb-1 block">Correo electrónico</label><input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="input-clinical h-9" /></div>
               <div><label className="text-xs font-medium mb-1 block">Domicilio</label><input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} className="input-clinical h-9" /></div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <div><label className="text-xs font-medium mb-1 block">Estado civil</label><input value={form.maritalStatus} onChange={e => setForm(f => ({ ...f, maritalStatus: e.target.value }))} className="input-clinical h-9" /></div>
-                <div><label className="text-xs font-medium mb-1 block">Tipo de sangre</label>
+                <div><label className="text-xs font-medium mb-1 block">Tipo sangre</label>
                   <select value={form.bloodType} onChange={e => setForm(f => ({ ...f, bloodType: e.target.value }))} className="input-clinical h-9">
                     <option value="">—</option>{['O+','O-','A+','A-','B+','B-','AB+','AB-'].map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
+                <div><label className="text-xs font-medium mb-1 block">Lugar origen</label><input value={form.birthPlace} onChange={e => setForm(f => ({ ...f, birthPlace: e.target.value }))} className="input-clinical h-9" /></div>
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><label className="text-xs font-medium mb-1 block">Escolaridad</label><input value={form.education} onChange={e => setForm(f => ({ ...f, education: e.target.value }))} className="input-clinical h-9" /></div>
+                <div><label className="text-xs font-medium mb-1 block">Ocupación</label><input value={form.occupation} onChange={e => setForm(f => ({ ...f, occupation: e.target.value }))} className="input-clinical h-9" /></div>
+              </div>
+              <div><label className="text-xs font-medium mb-1 block">Alergias (separadas por coma)</label><input value={form.allergies} onChange={e => setForm(f => ({ ...f, allergies: e.target.value }))} className="input-clinical h-9" placeholder="Penicilina, Ibuprofeno..." /></div>
+              {doctors.length > 0 && (
+                <div><label className="text-xs font-medium mb-1 block">Médico tratante principal</label>
+                  <select value={form.primaryDoctorId} onChange={e => setForm(f => ({ ...f, primaryDoctorId: e.target.value }))} className="input-clinical h-9">
+                    <option value="">— Sin asignar —</option>
+                    {doctors.map(d => <option key={d.id} value={d.id}>{d.fullName}</option>)}
+                  </select>
+                </div>
+              )}
               <div className="border-t pt-3">
                 <p className="text-xs font-medium mb-2 text-muted-foreground">Tutor / Responsable (menores)</p>
                 <div className="grid grid-cols-2 gap-2">
