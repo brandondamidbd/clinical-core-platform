@@ -16,7 +16,7 @@ export function DiagnosticsPage() {
     const result: { id: string; name: string; code: string; description: string; isPrimary: boolean; date: string; patientId: string; doctorId: string }[] = [];
     records.forEach(r => {
       (r.diagnoses || []).forEach(d => {
-        result.push({ ...d, patientId: r.patientId, doctorId: r.doctorId });
+        result.push({ id: d.id, name: d.name, code: d.code || '', description: d.description || '', isPrimary: d.isPrimary, date: d.date, patientId: r.patientId, doctorId: r.doctorId });
       });
     });
     return result.sort((a, b) => b.date.localeCompare(a.date));
