@@ -24,7 +24,9 @@ import UsersPage from "@/pages/UsersPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ClinicIdentityPage from "@/pages/ClinicIdentityPage";
 import SupportPage from "@/pages/SupportPage";
-import { DiagnosticsPage, ClinicalNotesPage, AuxStudiesPage, CertificatesPage, ConsentPage } from "@/pages/PlaceholderPages";
+import CertificatesPage from "@/pages/CertificatesPage";
+import ConsentPage from "@/pages/ConsentPage";
+import { DiagnosticsPage, ClinicalNotesPage, AuxStudiesPage } from "@/pages/PlaceholderPages";
 import NotFound from "@/pages/NotFound";
 import { useState } from "react";
 
