@@ -1,28 +1,47 @@
 import { useState } from 'react';
 import { useMedicationStore } from '@/stores/catalogStores';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, Edit2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function MedicationsPage() {
-  const medications = useMedicationStore((s) => s.medications);
-  const addMedication = useMedicationStore((s) => s.addMedication);
+  const medications = useMedicationStore(s => s.medications);
+  const addMedication = useMedicationStore(s => s.addMedication);
+  const updateMedication = useMedicationStore(s => s.updateMedication);
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', category: '', mainUse: '', presentation: '', usualDose: '', warnings: '' });
 
   const filtered = medications.filter(m => !m.metadata.isArchived && (m.name.toLowerCase().includes(search.toLowerCase()) || m.category.toLowerCase().includes(search.toLowerCase())));
 
+  const openEdit = (id: string) => {
+    const m = medications.find(med => med.id === id);
+    if (m) { setForm({ name: m.name, category: m.category, mainUse: m.mainUse, presentation: m.presentation, usualDose: m.usualDose, warnings: m.warnings || '' }); setEditId(id); setShowForm(true); }
+  };
+
   const handleSubmit = () => {
     if (!form.name || !form.category) return;
-    addMedication({ ...form, isActive: true });
-    setShowForm(false);
+    if (editId) {
+      updateMedication(editId, form);
+      toast.success('Medicamento actualizado');
+    } else {
+      addMedication({ ...form, isActive: true });
+      toast.success('Medicamento creado');
+    }
+    setShowForm(false); setEditId(null);
     setForm({ name: '', category: '', mainUse: '', presentation: '', usualDose: '', warnings: '' });
+  };
+
+  const toggleActive = (id: string) => {
+    const m = medications.find(med => med.id === id);
+    if (m) { updateMedication(id, { isActive: !m.isActive }); toast.success(m.isActive ? 'Desactivado' : 'Activado'); }
   };
 
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Catálogo de Medicamentos</h1>
-        <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-md hover:bg-primary/90">
+        <button onClick={() => { setEditId(null); setForm({ name: '', category: '', mainUse: '', presentation: '', usualDose: '', warnings: '' }); setShowForm(true); }} className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-md hover:bg-primary/90">
           <Plus className="w-3.5 h-3.5" /> Nuevo Medicamento
         </button>
       </div>
@@ -34,18 +53,24 @@ export default function MedicationsPage() {
 
       <div className="card-clinical overflow-hidden">
         <table className="w-full table-clinical text-xs">
-          <thead><tr className="border-b"><th className="p-2 text-left">Medicamento</th><th className="p-2 text-left">Categoría</th><th className="p-2 text-left">Presentación</th><th className="p-2 text-left">Dosis habitual</th><th className="p-2 text-left">Advertencias</th></tr></thead>
+          <thead><tr className="border-b"><th className="p-2 text-left">Medicamento</th><th className="p-2 text-left">Categoría</th><th className="p-2 text-left">Presentación</th><th className="p-2 text-left">Dosis habitual</th><th className="p-2 text-left">Advertencias</th><th className="p-2 text-center">Estado</th><th className="p-2"></th></tr></thead>
           <tbody>
             {filtered.map(m => (
-              <tr key={m.id} className="border-b last:border-0">
+              <tr key={m.id} className={`border-b last:border-0 ${!m.isActive ? 'opacity-50' : ''}`}>
                 <td className="p-2 font-medium">{m.name}</td>
                 <td className="p-2 text-muted-foreground">{m.category}</td>
                 <td className="p-2">{m.presentation}</td>
                 <td className="p-2 font-mono text-[11px]">{m.usualDose}</td>
                 <td className="p-2 text-destructive/80">{m.warnings || '—'}</td>
+                <td className="p-2 text-center">
+                  <button onClick={() => toggleActive(m.id)} className={`text-[10px] px-1.5 py-0.5 rounded ${m.isActive ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                    {m.isActive ? 'Activo' : 'Inactivo'}
+                  </button>
+                </td>
+                <td className="p-2"><button onClick={() => openEdit(m.id)} className="p-1 rounded hover:bg-muted"><Edit2 className="w-3 h-3 text-muted-foreground" /></button></td>
               </tr>
             ))}
-            {filtered.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Sin resultados</td></tr>}
+            {filtered.length === 0 && <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Sin resultados</td></tr>}
           </tbody>
         </table>
       </div>
@@ -54,7 +79,7 @@ export default function MedicationsPage() {
         <div className="fixed inset-0 bg-foreground/20 z-50 flex justify-end">
           <div className="w-full max-w-md bg-card h-full overflow-auto shadow-elevated animate-slide-in p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold">Nuevo Medicamento</h2>
+              <h2 className="text-sm font-semibold">{editId ? 'Editar' : 'Nuevo'} Medicamento</h2>
               <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-muted"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-3">
@@ -64,7 +89,7 @@ export default function MedicationsPage() {
               <div><label className="text-xs font-medium mb-1 block">Presentación</label><input value={form.presentation} onChange={e => setForm(f => ({ ...f, presentation: e.target.value }))} className="input-clinical h-9" /></div>
               <div><label className="text-xs font-medium mb-1 block">Dosis habitual</label><input value={form.usualDose} onChange={e => setForm(f => ({ ...f, usualDose: e.target.value }))} className="input-clinical h-9" /></div>
               <div><label className="text-xs font-medium mb-1 block">Advertencias</label><textarea value={form.warnings} onChange={e => setForm(f => ({ ...f, warnings: e.target.value }))} className="input-clinical min-h-[60px] py-2" /></div>
-              <button onClick={handleSubmit} className="w-full bg-primary text-primary-foreground text-xs py-2 rounded-md hover:bg-primary/90 font-medium">Guardar Medicamento</button>
+              <button onClick={handleSubmit} className="w-full bg-primary text-primary-foreground text-xs py-2 rounded-md hover:bg-primary/90 font-medium">{editId ? 'Actualizar' : 'Guardar'} Medicamento</button>
             </div>
           </div>
         </div>

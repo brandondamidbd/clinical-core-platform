@@ -130,6 +130,7 @@ export interface Patient {
   birthPlace?: string;
   bloodType?: string;
   education?: string;
+  occupation?: string;
   address?: string;
   phone: string;
   email?: string;
@@ -138,6 +139,20 @@ export interface Patient {
   primaryDoctorId?: string;
   allergies: string[];
   metadata: Metadata;
+}
+
+export interface AgendaConfig {
+  schedule: Record<string, { enabled: boolean; blocks: { start: string; end: string }[] }>;
+  defaultDuration: number;
+  appointmentTypes: AppointmentType[];
+  cancellationReasons: string[];
+}
+
+export interface AppointmentType {
+  id: string;
+  name: string;
+  duration: number;
+  color: string;
 }
 
 export interface MedicalRecord {
