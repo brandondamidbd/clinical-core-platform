@@ -8,12 +8,12 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
   Search, User, Heart, FileText, Stethoscope, Activity, Pill, CreditCard,
-  Check, ChevronRight, X, Plus, Save, CheckCircle2, Trash2, UserPlus
+  Check, ChevronRight, X, Plus, Save, CheckCircle2, Trash2, UserPlus, ClipboardList
 } from 'lucide-react';
 import { generateId } from '@/stores/helpers';
 import { toast } from 'sonner';
 
-type ConsultaStep = 'vitals' | 'motive' | 'notes' | 'diagnosis' | 'treatment' | 'prescription' | 'payment';
+type ConsultaStep = 'vitals' | 'motive' | 'notes' | 'diagnosis' | 'treatment' | 'prescription' | 'payment' | 'summary';
 
 const STEPS: { key: ConsultaStep; label: string; icon: React.ElementType }[] = [
   { key: 'vitals', label: 'Signos Vitales', icon: Heart },
@@ -23,6 +23,7 @@ const STEPS: { key: ConsultaStep; label: string; icon: React.ElementType }[] = [
   { key: 'treatment', label: 'Tratamientos', icon: Activity },
   { key: 'prescription', label: 'Receta', icon: Pill },
   { key: 'payment', label: 'Pago', icon: CreditCard },
+  { key: 'summary', label: 'Resumen', icon: ClipboardList },
 ];
 
 interface DiagnosisEntry {
