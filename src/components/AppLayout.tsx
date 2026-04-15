@@ -2,7 +2,8 @@ import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { useClinicStore } from '@/stores/clinicStore';
 import { useCurrentRole } from '@/hooks/useCurrentRole';
-import { Bell, Search, ChevronDown } from 'lucide-react';
+import { Bell, ChevronDown } from 'lucide-react';
+import { GlobalSearch } from './GlobalSearch';
 import { useState, useRef, useEffect } from 'react';
 
 const ROLE_INITIALS: Record<string, string> = {
@@ -30,13 +31,7 @@ export function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-12 flex items-center justify-between px-4 border-b bg-card flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                placeholder="Buscar paciente, cita, folio... (Ctrl+K)"
-                className="input-clinical pl-8 w-72 h-8 text-xs"
-              />
-            </div>
+            <GlobalSearch />
           </div>
           <div className="flex items-center gap-3">
             {subscription.status !== 'active' && subscription.status !== 'trial' && (

@@ -2,7 +2,8 @@ import { useTreatmentStore, useServiceStore } from '@/stores/catalogStores';
 import { usePatientStore } from '@/stores/patientStore';
 import { useDoctorStore } from '@/stores/doctorStore';
 import { useState, useMemo } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Search, Filter } from 'lucide-react';
+import { format } from 'date-fns';
 import type { TreatmentStatus } from '@/types';
 
 const STATUS_LABELS: Record<TreatmentStatus, string> = { recommended: 'Recomendado', budgeted: 'Presupuestado', approved: 'Aprobado', in_progress: 'En proceso', completed: 'Completado', paid: 'Pagado', historical: 'Histórico' };
@@ -17,9 +18,26 @@ export default function TreatmentsPage() {
   const patients = useMemo(() => allPatients.filter(p => !p.metadata.isArchived), [allPatients]);
   const doctors = useMemo(() => allDoctors.filter(d => d.isActive), [allDoctors]);
   const services = useMemo(() => allServices.filter(s => s.isActive), [allServices]);
-  
+
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ patientId: '', doctorId: doctors[0]?.id || '', description: '', price: '', observations: '' });
+  const [search, setSearch] = useState('');
+  const [filterPatient, setFilterPatient] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  const filtered = useMemo(() => {
+    return treatments.filter(t => {
+      if (filterPatient && t.patientId !== filterPatient) return false;
+      if (filterStatus && t.status !== filterStatus) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const pt = patients.find(p => p.id === t.patientId);
+        const name = pt ? `${pt.firstName} ${pt.lastName}`.toLowerCase() : '';
+        if (!t.description.toLowerCase().includes(q) && !name.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [treatments, search, filterPatient, filterStatus, patients]);
 
   const handleSubmit = () => {
     if (!form.patientId || !form.description || !form.price) return;
@@ -33,18 +51,38 @@ export default function TreatmentsPage() {
         <h1 className="page-title">Tratamientos</h1>
         <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-md hover:bg-primary/90"><Plus className="w-3.5 h-3.5" /> Nuevo</button>
       </div>
+
+      <div className="flex flex-wrap gap-2 items-center">
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar tratamiento o paciente..." className="input-clinical pl-8 h-8 text-xs w-60" />
+        </div>
+        <select value={filterPatient} onChange={e => setFilterPatient(e.target.value)} className="input-clinical h-8 text-xs w-48">
+          <option value="">Todos los pacientes</option>
+          {patients.map(p => <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>)}
+        </select>
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="input-clinical h-8 text-xs w-36">
+          <option value="">Todos los estados</option>
+          {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        </select>
+      </div>
+
       <div className="card-clinical overflow-hidden">
         <table className="w-full table-clinical text-xs">
-          <thead><tr className="border-b"><th className="p-2 text-left">Paciente</th><th className="p-2 text-left">Tratamiento</th><th className="p-2 text-right">Precio</th><th className="p-2 text-left">Estado</th></tr></thead>
+          <thead><tr className="border-b"><th className="p-2 text-left">Paciente</th><th className="p-2 text-left">Médico</th><th className="p-2 text-left">Tratamiento</th><th className="p-2 text-center">Pieza</th><th className="p-2 text-right">Precio</th><th className="p-2 text-left">Fecha</th><th className="p-2 text-left">Estado</th></tr></thead>
           <tbody>
-            {treatments.length === 0 ? <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">Sin tratamientos</td></tr> :
-              treatments.map(t => {
+            {filtered.length === 0 ? <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Sin tratamientos</td></tr> :
+              filtered.map(t => {
                 const pt = patients.find(p => p.id === t.patientId);
+                const doc = allDoctors.find(d => d.id === t.doctorId);
                 return (
                   <tr key={t.id} className="border-b last:border-0">
                     <td className="p-2 font-medium">{pt ? `${pt.firstName} ${pt.lastName}` : '—'}</td>
+                    <td className="p-2 text-muted-foreground">{doc?.fullName || '—'}</td>
                     <td className="p-2">{t.description}</td>
+                    <td className="p-2 text-center font-mono">{t.toothNumber || '—'}</td>
                     <td className="p-2 text-right font-mono">${t.price.toLocaleString()}</td>
+                    <td className="p-2 font-mono text-muted-foreground">{format(new Date(t.metadata.createdAt), 'dd/MM/yy')}</td>
                     <td className="p-2"><select value={t.status} onChange={e => updateTreatment(t.id, { status: e.target.value as TreatmentStatus })} className="text-[10px] border rounded px-1.5 py-0.5 bg-card">
                       {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                     </select></td>
