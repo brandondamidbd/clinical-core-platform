@@ -30,13 +30,7 @@ export function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-12 flex items-center justify-between px-4 border-b bg-card flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                placeholder="Buscar paciente, cita, folio... (Ctrl+K)"
-                className="input-clinical pl-8 w-72 h-8 text-xs"
-              />
-            </div>
+            <GlobalSearch />
           </div>
           <div className="flex items-center gap-3">
             {subscription.status !== 'active' && subscription.status !== 'trial' && (
