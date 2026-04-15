@@ -738,6 +738,120 @@ export default function ConsultaPage() {
               </div>
             </div>
           )}
+
+          {/* ===== SUMMARY ===== */}
+          {activeStep === 'summary' && (
+            <div>
+              <h2 className="section-title flex items-center gap-2"><ClipboardList className="w-4 h-4" /> Resumen de Consulta</h2>
+              <p className="text-xs text-muted-foreground mb-4">Revisa toda la información antes de finalizar.</p>
+              <div className="space-y-4">
+                {/* Patient */}
+                <div className="p-3 rounded-lg border bg-muted/20">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Paciente</span>
+                  <p className="text-sm font-medium">{selectedPatient?.firstName} {selectedPatient?.lastName}</p>
+                  {selectedPatient?.allergies?.length ? <p className="text-xs text-destructive">Alergias: {selectedPatient.allergies.join(', ')}</p> : null}
+                </div>
+
+                {/* Vitals */}
+                {completedSteps.has('vitals') && (
+                  <div className="p-3 rounded-lg border bg-muted/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Signos Vitales</span>
+                    <div className="grid grid-cols-4 gap-2 mt-1 text-xs">
+                      {vitals.weight && <div>Peso: <strong>{vitals.weight} kg</strong></div>}
+                      {vitals.height && <div>Talla: <strong>{vitals.height} cm</strong></div>}
+                      {bmi && <div>IMC: <strong>{bmi} ({bmiCategory})</strong></div>}
+                      {vitals.heartRate && <div>FC: <strong>{vitals.heartRate} lpm</strong></div>}
+                      {vitals.bloodPressureSystolic && <div>T/A: <strong>{vitals.bloodPressureSystolic}/{vitals.bloodPressureDiastolic}</strong></div>}
+                      {vitals.temperature && <div>Temp: <strong>{vitals.temperature}°C</strong></div>}
+                      {vitals.oxygenSaturation && <div>SpO₂: <strong>{vitals.oxygenSaturation}%</strong></div>}
+                      {vitals.respiratoryRate && <div>FR: <strong>{vitals.respiratoryRate} rpm</strong></div>}
+                    </div>
+                  </div>
+                )}
+
+                {/* Motive */}
+                {motive && (
+                  <div className="p-3 rounded-lg border bg-muted/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Motivo de Consulta</span>
+                    <p className="text-xs mt-1">{motive}</p>
+                  </div>
+                )}
+
+                {/* Clinical Note */}
+                {clinicalNote && (
+                  <div className="p-3 rounded-lg border bg-muted/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Nota Clínica</span>
+                    <p className="text-xs mt-1 whitespace-pre-wrap">{clinicalNote}</p>
+                  </div>
+                )}
+
+                {/* Diagnoses */}
+                {diagnoses.filter(d => d.name).length > 0 && (
+                  <div className="p-3 rounded-lg border bg-muted/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Diagnósticos ({diagnoses.filter(d => d.name).length})</span>
+                    <div className="mt-1 space-y-1">
+                      {diagnoses.filter(d => d.name).map(d => (
+                        <div key={d.id} className="text-xs flex items-center gap-2">
+                          {d.isPrimary && <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">Primario</span>}
+                          <span className="font-medium">{d.name}</span>
+                          {d.code && <span className="text-muted-foreground">({d.code})</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Treatments */}
+                {treatments.filter(t => t.description).length > 0 && (
+                  <div className="p-3 rounded-lg border bg-muted/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Tratamientos ({treatments.filter(t => t.description).length})</span>
+                    <div className="mt-1 space-y-1">
+                      {treatments.filter(t => t.description).map(t => (
+                        <div key={t.id} className="text-xs flex justify-between">
+                          <span>{t.description} {t.toothNumber && <span className="text-muted-foreground">(pieza {t.toothNumber})</span>}</span>
+                          <span className="font-mono font-medium">${parseFloat(t.price || '0').toLocaleString()}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between font-semibold text-xs border-t pt-1">
+                        <span>Total</span><span className="font-mono">${totalTreatmentsPrice.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Prescription */}
+                {completedSteps.has('prescription') && prescription.medications.filter(m => m.name).length > 0 && (
+                  <div className="p-3 rounded-lg border bg-muted/20">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Receta ({prescription.medications.filter(m => m.name).length} medicamentos)</span>
+                    <div className="mt-1 space-y-1">
+                      {prescription.medications.filter(m => m.name).map((m, i) => (
+                        <div key={i} className="text-xs">
+                          <strong>{m.name}</strong> {m.presentation} — {m.dose}, {m.route}, {m.frequency}, {m.duration}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment */}
+                {completedSteps.has('payment') && parseFloat(payment.amount) > 0 && (
+                  <div className="p-3 rounded-lg border bg-success/10">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase">Pago Registrado</span>
+                    <div className="text-xs mt-1">
+                      <strong>${parseFloat(payment.amount).toLocaleString()}</strong> — {payment.method === 'cash' ? 'Efectivo' : payment.method === 'card' ? 'Tarjeta' : payment.method === 'transfer' ? 'Transferencia' : 'Otro'}
+                      {payment.notes && <span className="text-muted-foreground"> · {payment.notes}</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button onClick={handleFinalize} className="flex items-center gap-2 bg-success text-success-foreground text-xs px-6 py-2.5 rounded-md hover:bg-success/90 font-semibold">
+                  <CheckCircle2 className="w-4 h-4" /> Confirmar y Finalizar Consulta
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
