@@ -2,16 +2,25 @@ import { useState, useMemo } from 'react';
 import { usePatientStore } from '@/stores/patientStore';
 import { useDoctorStore } from '@/stores/doctorStore';
 import { Link } from 'react-router-dom';
-import { Plus, Search, X, AlertTriangle } from 'lucide-react';
+import { Plus, Search, X, AlertTriangle, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+
+const EMPTY_FORM = {
+  firstName: '', lastName: '', dateOfBirth: '', sex: 'M' as 'M' | 'F' | 'other',
+  phone: '', email: '', address: '', maritalStatus: '', bloodType: '',
+  guardianName: '', guardianPhone: '', birthPlace: '', education: '', occupation: '',
+  allergies: '', primaryDoctorId: '',
+};
 
 export default function PatientsPage() {
   const patients = usePatientStore(s => s.patients);
   const addPatient = usePatientStore(s => s.addPatient);
+  const updatePatient = usePatientStore(s => s.updatePatient);
   const checkDuplicate = usePatientStore(s => s.checkDuplicate);
   const doctors = useDoctorStore(s => s.doctors).filter(d => d.isActive);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
   const [dupWarning, setDupWarning] = useState('');
 
@@ -20,20 +29,37 @@ export default function PatientsPage() {
     p.phone.includes(search) || (p.email && p.email.toLowerCase().includes(search.toLowerCase()))
   )), [patients, search]);
 
-  const [form, setForm] = useState({
-    firstName: '', lastName: '', dateOfBirth: '', sex: 'M' as 'M' | 'F' | 'other',
-    phone: '', email: '', address: '', maritalStatus: '', bloodType: '',
-    guardianName: '', guardianPhone: '', birthPlace: '', education: '', occupation: '',
-    allergies: '', primaryDoctorId: '',
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
+
+  const openNew = () => {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setFormError(''); setDupWarning('');
+    setShowForm(true);
+  };
+
+  const openEdit = (id: string) => {
+    const p = patients.find(pt => pt.id === id);
+    if (!p) return;
+    setEditingId(id);
+    setForm({
+      firstName: p.firstName, lastName: p.lastName, dateOfBirth: p.dateOfBirth,
+      sex: p.sex, phone: p.phone, email: p.email || '', address: p.address || '',
+      maritalStatus: p.maritalStatus || '', bloodType: p.bloodType || '',
+      guardianName: p.guardianName || '', guardianPhone: p.guardianPhone || '',
+      birthPlace: p.birthPlace || '', education: p.education || '', occupation: p.occupation || '',
+      allergies: p.allergies.join(', '), primaryDoctorId: p.primaryDoctorId || '',
+    });
+    setFormError(''); setDupWarning('');
+    setShowForm(true);
+  };
 
   const handleSubmit = () => {
     setFormError(''); setDupWarning('');
     if (!form.firstName || !form.lastName || !form.phone || !form.dateOfBirth) { setFormError('Nombre, apellido, teléfono y fecha de nacimiento son obligatorios'); return; }
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) { setFormError('Correo electrónico inválido'); return; }
-    const dup = checkDuplicate(form.firstName, form.lastName, form.phone, form.email);
-    if (dup && !dupWarning) { setDupWarning(`Posible duplicado: ${dup.firstName} ${dup.lastName} (${dup.phone}). Guarda de nuevo para confirmar.`); return; }
-    addPatient({
+
+    const data = {
       firstName: form.firstName, lastName: form.lastName, dateOfBirth: form.dateOfBirth,
       sex: form.sex, phone: form.phone, email: form.email || undefined, address: form.address || undefined,
       maritalStatus: form.maritalStatus || undefined, bloodType: form.bloodType || undefined,
@@ -41,16 +67,26 @@ export default function PatientsPage() {
       birthPlace: form.birthPlace || undefined, education: form.education || undefined,
       occupation: form.occupation || undefined, primaryDoctorId: form.primaryDoctorId || undefined,
       allergies: form.allergies ? form.allergies.split(',').map(a => a.trim()).filter(Boolean) : [],
-    });
-    setShowForm(false); setDupWarning(''); toast.success('Paciente registrado');
-    setForm({ firstName: '', lastName: '', dateOfBirth: '', sex: 'M', phone: '', email: '', address: '', maritalStatus: '', bloodType: '', guardianName: '', guardianPhone: '', birthPlace: '', education: '', occupation: '', allergies: '', primaryDoctorId: '' });
+    };
+
+    if (editingId) {
+      updatePatient(editingId, data);
+      toast.success('Paciente actualizado');
+    } else {
+      const dup = checkDuplicate(form.firstName, form.lastName, form.phone, form.email);
+      if (dup && !dupWarning) { setDupWarning(`Posible duplicado: ${dup.firstName} ${dup.lastName} (${dup.phone}). Guarda de nuevo para confirmar.`); return; }
+      addPatient(data as any);
+      toast.success('Paciente registrado');
+    }
+    setShowForm(false); setDupWarning('');
+    setForm(EMPTY_FORM);
   };
 
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="page-header">
         <h1 className="page-title">Pacientes</h1>
-        <button onClick={() => setShowForm(true)} className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-md hover:bg-primary/90">
+        <button onClick={openNew} className="flex items-center gap-1.5 bg-primary text-primary-foreground text-xs px-3 py-1.5 rounded-md hover:bg-primary/90">
           <Plus className="w-3.5 h-3.5" /> Nuevo Paciente
         </button>
       </div>
@@ -74,7 +110,10 @@ export default function PatientsPage() {
                   <td className="p-2">{age}</td>
                   <td className="p-2">{p.sex}</td>
                   <td className="p-2">{p.allergies.length > 0 ? <span className="text-destructive font-medium">{p.allergies.join(', ')}</span> : '—'}</td>
-                  <td className="p-2"><Link to={`/pacientes/${p.id}`} className="text-primary hover:underline">Ver</Link></td>
+                  <td className="p-2 flex items-center gap-2">
+                    <button onClick={() => openEdit(p.id)} className="text-muted-foreground hover:text-primary" title="Editar"><Pencil className="w-3.5 h-3.5" /></button>
+                    <Link to={`/pacientes/${p.id}`} className="text-primary hover:underline">Ver</Link>
+                  </td>
                 </tr>
               );
             })}
@@ -87,7 +126,7 @@ export default function PatientsPage() {
         <div className="fixed inset-0 bg-foreground/20 z-50 flex justify-end">
           <div className="w-full max-w-md bg-card h-full overflow-auto shadow-elevated animate-slide-in p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold">Nuevo Paciente</h2>
+              <h2 className="text-sm font-semibold">{editingId ? 'Editar Paciente' : 'Nuevo Paciente'}</h2>
               <button onClick={() => setShowForm(false)} className="p-1 rounded hover:bg-muted"><X className="w-4 h-4" /></button>
             </div>
             {formError && <div className="text-xs text-destructive bg-destructive/10 p-2 rounded mb-3">{formError}</div>}
@@ -138,7 +177,7 @@ export default function PatientsPage() {
                 </div>
               </div>
               <button onClick={handleSubmit} className="w-full bg-primary text-primary-foreground text-xs py-2 rounded-md hover:bg-primary/90 font-medium mt-2">
-                Registrar Paciente
+                {editingId ? 'Guardar Cambios' : 'Registrar Paciente'}
               </button>
             </div>
           </div>
