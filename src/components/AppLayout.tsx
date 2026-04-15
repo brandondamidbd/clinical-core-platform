@@ -2,7 +2,8 @@ import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 import { useClinicStore } from '@/stores/clinicStore';
 import { useCurrentRole } from '@/hooks/useCurrentRole';
-import { Bell, Search, ChevronDown } from 'lucide-react';
+import { Bell, ChevronDown } from 'lucide-react';
+import { GlobalSearch } from './GlobalSearch';
 import { useState, useRef, useEffect } from 'react';
 
 const ROLE_INITIALS: Record<string, string> = {
