@@ -274,6 +274,7 @@ export default function ConsultaPage() {
       date: format(new Date(), 'yyyy-MM-dd'),
     });
     markStepDone('payment');
+    setActiveStep('summary');
   };
 
   const handleFinalize = () => {
